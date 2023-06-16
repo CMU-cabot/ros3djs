@@ -5148,8 +5148,7 @@ function ActionHandle(options) {
   this.actionType = options.actionType;
 
 
-    this._messageCallback = function (data) {
-	console.log(data)
+  this._messageCallback = function (data) {
     if (data.response_type === "feedback") {
       that.emit("feedback", new ActionFeedback(data));
     } else if (data.response_type === "result" || "error") {
@@ -5158,7 +5157,7 @@ function ActionHandle(options) {
   };
 
   this.on("feedback", function (msg) {
-    console.log("feedback", msg.values);
+    //console.log("feedback", msg.values);
     that.feedback = msg.values;
   })
 
@@ -5306,7 +5305,7 @@ function TFClient(options) {
 
   // Create an Action Client
   this.actionClient = new Actions.ActionHandle({
-    ros: ros,
+    ros: options.ros,
     name : this.serverName,
     actionType : 'tf2_web_republisher/action/TFSubscription',
   });
@@ -5377,9 +5376,9 @@ TFClient.prototype.updateGoal = function() {
     // otherwise, use the service interface
     // The service interface has the same parameters as the action,
     // plus the timeout
-
     goalMessage.timeout = this.topicTimeout;
     var request = new ServiceRequest(goalMessage);
+
     this.serviceClient.callService(request, this.processResponse.bind(this));
   }
 
@@ -5398,7 +5397,6 @@ TFClient.prototype.processResponse = function(response) {
   if (this._isDisposed) {
     return;
   }
-
 
   // if we subscribed to a topic before, unsubscribe so
   // the republisher stops publishing it
