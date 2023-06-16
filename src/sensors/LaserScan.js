@@ -19,53 +19,54 @@
  *  * messageRatio (optional) - message subsampling ratio (default: 1, no subsampling)
  *  * material (optional) - a material object or an option to construct a PointsMaterial.
  */
-ROS3D.LaserScan = function(options) {
-  options = options || {};
-  this.ros = options.ros;
-  this.topicName = options.topic || '/scan';
-  this.compression = options.compression || 'cbor';
-  this.points = new ROS3D.Points(options);
-  this.rosTopic = undefined;
-  this.subscribe();
+ ROS3D.LaserScan = function(options) {
+   options = options || {};
+   this.ros = options.ros;
+   this.topicName = options.topic || '/scan';
+   this.messageTypeName = options.messageType || 'sensor_msgs/LaserScan';
+   this.compression = options.compression || 'cbor';
+   this.points = new ROS3D.Points(options);
+   this.rosTopic = undefined;
+   this.subscribe();
 
-};
-ROS3D.LaserScan.prototype.__proto__ = THREE.Object3D.prototype;
+ };
+ ROS3D.LaserScan.prototype.__proto__ = THREE.Object3D.prototype;
 
 
-ROS3D.LaserScan.prototype.unsubscribe = function(){
-  if(this.rosTopic){
-    this.rosTopic.unsubscribe(this.processMessage);
-  }
-};
+ ROS3D.LaserScan.prototype.unsubscribe = function(){
+   if(this.rosTopic){
+     this.rosTopic.unsubscribe(this.processMessage);
+   }
+ };
 
-ROS3D.LaserScan.prototype.subscribe = function(){
-  this.unsubscribe();
+ ROS3D.LaserScan.prototype.subscribe = function(){
+   this.unsubscribe();
 
-  // subscribe to the topic
-  this.rosTopic = new ROSLIB.Topic({
-    ros : this.ros,
-    name : this.topicName,
-    compression : this.compression,
-    queue_length : 1,
-    messageType : 'sensor_msgs/LaserScan'
-  });
-  this.rosTopic.subscribe(this.processMessage.bind(this));
-};
+   // subscribe to the topic
+   this.rosTopic = new ROSLIB.Topic({
+     ros : this.ros,
+     name : this.topicName,
+     compression : this.compression,
+     queue_length : 1,
+     messageType : this.messageTypeName
+   });
+   this.rosTopic.subscribe(this.processMessage.bind(this));
+ };
 
-ROS3D.LaserScan.prototype.processMessage = function(message){
-  if(!this.points.setup(message.header.frame_id)) {
-      return;
-  }
-  var n = message.ranges.length;
-  var j = 0;
-  for(var i=0;i<n;i+=this.points.pointRatio){
-    var range = message.ranges[i];
-    if(range >= message.range_min && range <= message.range_max){
-        var angle = message.angle_min + i * message.angle_increment;
-        this.points.positions.array[j++] = range * Math.cos(angle);
-        this.points.positions.array[j++] = range * Math.sin(angle);
-        this.points.positions.array[j++] = 0.0;
-    }
-  }
-  this.points.update(j/3);
-};
+ ROS3D.LaserScan.prototype.processMessage = function(message){
+   if(!this.points.setup(message.header.frame_id)) {
+       return;
+   }
+   var n = message.ranges.length;
+   var j = 0;
+   for(var i=0;i<n;i+=this.points.pointRatio){
+     var range = message.ranges[i];
+     if(range >= message.range_min && range <= message.range_max){
+         var angle = message.angle_min + i * message.angle_increment;
+         this.points.positions.array[j++] = range * Math.cos(angle);
+         this.points.positions.array[j++] = range * Math.sin(angle);
+         this.points.positions.array[j++] = 0.0;
+     }
+   }
+   this.points.update(j/3);
+ };
