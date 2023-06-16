@@ -52,7 +52,7 @@
    });
    this.rosTopic.subscribe(this.processMessage.bind(this));
  };
-
+ 
  ROS3D.LaserScan.prototype.processMessage = function(message){
    if(!this.points.setup(message.header.frame_id)) {
        return;

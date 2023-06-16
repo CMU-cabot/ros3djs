@@ -92,7 +92,6 @@
        imageData[++i] = val;
        // a
        imageData[++i] = 255;
-
      }
    }
 

@@ -55,7 +55,7 @@
    });
    this.rosTopic.subscribe(this.processMessage.bind(this));
  };
-
+ 
  ROS3D.Pose.prototype.processMessage = function(message){
    if(this.sn!==null){
        this.sn.unsubscribeTf();
