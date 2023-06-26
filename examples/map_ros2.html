@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.89.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4/lib/eventemitter2.js"></script>
+<script src="./js/roslib.js"></script>
+<script src="../build/ros3d.js"></script>
+
+<script>
+  /**
+   * Setup all visualization elements when the page is loaded.
+   */
+  function init() {
+    // Connect to ROS.
+    var ros = new ROSLIB.Ros({
+      // set this to false to use the new service interface to
+      // tf2_web_republisher. true is the default and means roslibjs
+      // will use the action interface
+      groovyCompatibility : false
+    });
+
+    // Create the main viewer.
+    var viewer = new ROS3D.Viewer({
+      divID : 'map',
+      width : window.innerWidth,
+      height : window.innerHeight,
+      background : '#808080',
+      antialias : true,
+      cameraPose : {x: 0, y: -1, z: 150}
+    })
+
+	  // If there is an error on the backend, an 'error' emit will be emitted.
+	  ros.on('error', function(error) {
+		  console.log(error);
+	  });
+
+	  // Find out exactly when we made a connection.
+	  ros.on('connection', function() {
+		  console.log('Connection made!');
+	  });
+
+	  ros.on('close', function() {
+		  console.log('Connection closed.');
+	  });
+
+    // Create a connection to the rosbridge WebSocket server.
+    ros.connect('ws://localhost:9091');
+
+    // Setup the marker client.
+    var gridClient = new ROS3D.OccupancyGridClient({
+      ros : ros,
+      rootObject : viewer.scene,
+      cntinuous: true,
+      compression : ' '
+    });
+
+    // Setup a client to listen to TFs.
+    var tfClient = new ROSLIB.TFClient({
+      ros : ros,
+      angularThres : 0.01,
+      transThres : 0.01,
+      rate : 10.0,
+      updateDelay : 500,
+      fixedFrame : '/map'
+    });
+
+    // Setup the marker client.
+    var laserScan = new ROS3D.LaserScan({
+      ros : ros,
+      topic : '/scan',
+      messageType : 'sensor_msgs/LaserScan',
+      tfClient : tfClient,
+      compression : ' ',
+      rootObject : viewer.scene,
+      material : { size : 1, color : 0xff00ff }
+    });
+
+    // Setup the marker client.
+    var path = new ROS3D.Path({
+      ros : ros,
+      topic : '/path',
+      messageType : 'nav_msgs/Path',
+      tfClient : tfClient,
+      rootObject : viewer.scene,
+      color : 0x0000ff
+    });
+
+
+    // Setup the marker client.
+    var pose = new ROS3D.Pose({
+      ros : ros,
+      topic : '/cabot/pose_log',
+      messageType : 'cabot_msgs/msg/PoseLog',
+      tfClient : tfClient,
+      rootObject : viewer.scene,
+      color : 0xff0000,
+      length : 1.2,
+      headLength : 0.6,
+      shaftDiameter : 0.1,
+      headDiameter : 1.2
+    });
+
+
+    // Setup the marker client.
+    var people = new ROS3D.People({
+      ros : ros,
+      topic : '/people',
+      messageType : 'people_msgs/msg/People',
+      tfClient : tfClient,
+      rootObject : viewer.scene,
+      color : 0x0000ff,
+      radius : 0.5
+    });
+
+  }
+</script>
+</head>
+
+<body onload="init()">
+  <h1>Simple Map Example</h1>
+  <p>
+    Run the following commands in the terminal then refresh this page. This will load a map from the
+    <tt>ros-groovy-rail-maps</tt>
+    package.
+  </p>
+  <ol>
+    <li><tt>ros2 run rosbridge_server rosbridge_websocket --ros-args -p port:=9091 -p max_message_size:=128000000 --params-file qos.yaml</tt></li>
+    <li><tt>ros2 run tf2_web_republisher tf2_web_republisher_node</tt></li>
+  </ol>
+  <div id="map"></div>
+</body>
+</html>
