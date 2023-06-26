@@ -85,11 +85,11 @@ ROS3D.OccupancyGrid = function(options) {
       // determine the index into the image data array
       var i = (col + (row * width)) * 4;
       // r
-      imageData[i] = val;
+      imageData[i] = (val * this.color.r) / 255,
       // g
-      imageData[++i] = val;
+      imageData[++i] = (val * this.color.g) / 255;
       // b
-      imageData[++i] = val;
+      imageData[++i] = (val * this.color.b) / 255;
       // a
       imageData[++i] = 255;
     }
