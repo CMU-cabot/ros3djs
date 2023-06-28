@@ -79,6 +79,8 @@ ROS3D.OccupancyGrid = function(options) {
       var color = this.getColor(val);
       // determine the index into the image data array
       var i = (col + (row * width)) * 4;
+
+      // copy the color
       imageData.set(color, i);
     }
   }
