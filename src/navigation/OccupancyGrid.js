@@ -60,6 +60,7 @@ ROS3D.OccupancyGrid = function(options) {
   this.scale.x = info.resolution;
   this.scale.y = info.resolution;
 
+  var data = message.data;
   // update the texture (after the the super call and this are accessible)
   this.color = color;
   this.material = material;
@@ -72,26 +73,13 @@ ROS3D.OccupancyGrid = function(options) {
       var invRow = (height - row - 1);
       var mapI = col + (invRow * width);
       // determine the value
-      var data = message.data[mapI];
-      var val;
-      if (data === 100) {
-        val = 0;
-      } else if (data === 0) {
-        val = 255;
-      } else {
-        val = 127;
-      }
+      var val = this.getValue(mapI, data);
 
+      // determine the color
+      var color = this.getColor(val);
       // determine the index into the image data array
       var i = (col + (row * width)) * 4;
-      // r
-      imageData[i] = (val * this.color.r) / 255,
-      // g
-      imageData[++i] = (val * this.color.g) / 255;
-      // b
-      imageData[++i] = (val * this.color.b) / 255;
-      // a
-      imageData[++i] = 255;
+      imageData.set(color, i);
     }
   }
 
@@ -107,11 +95,9 @@ ROS3D.OccupancyGrid.prototype.dispose = function() {
 /**
  * Returns the value for a given grid cell
  * @param {int} index the current index of the cell
- * @param {int} row the row of the cell
- * @param {int} col the column of the cell
  * @param {object} data the data buffer
  */
-ROS3D.OccupancyGrid.prototype.getValue = function(index, row, col, data) {
+ROS3D.OccupancyGrid.prototype.getValue = function(index, data) {
   return data[index];
 };
 
@@ -119,17 +105,22 @@ ROS3D.OccupancyGrid.prototype.getValue = function(index, row, col, data) {
  * Returns a color value given parameters of the position in the grid; the default implementation
  * scales the default color value by the grid value. Subclasses can extend this functionality
  * (e.g. lookup a color in a color map).
- * @param {int} index the current index of the cell
- * @param {int} row the row of the cell
- * @param {int} col the column of the cell
  * @param {float} value the value of the cell
  * @returns r,g,b,a array of values from 0 to 255 representing the color values for each channel
  */
-ROS3D.OccupancyGrid.prototype.getColor = function(index, row, col, value) {
+ROS3D.OccupancyGrid.prototype.getColor = function(value) {
+  var scale;
+  if (value === 100) {
+    scale = 0;
+  } else if (value === 0) {
+    scale = 255;
+  } else {
+    scale = 127;
+  }
   return [
-    (value * this.color.r) / 255,
-    (value * this.color.g) / 255,
-    (value * this.color.b) / 255,
+    (scale * this.color.r) / 255,
+    (scale * this.color.g) / 255,
+    (scale * this.color.b) / 255,
     255
   ];
 };
