@@ -117,10 +117,18 @@ ROS3D.OccupancyGrid.prototype.getValue = function(index, row, col, data) {
  * @returns r,g,b,a array of values from 0 to 255 representing the color values for each channel
  */
 ROS3D.OccupancyGrid.prototype.getColor = function(index, row, col, value) {
+  var scale;
+  if (value === 100) {
+    scale = 0;
+  } else if (value === 0) {
+    scale = 255;
+  } else {
+    scale = 127;
+  }
   return [
-    (value * this.color.r) / 255,
-    (value * this.color.g) / 255,
-    (value * this.color.b) / 255,
+    (scale * this.color.r) / 255,
+    (scale * this.color.g) / 255,
+    (scale * this.color.b) / 255,
     255
   ];
 };
