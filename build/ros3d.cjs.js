@@ -55808,10 +55808,18 @@ var OccupancyGrid = /*@__PURE__*/(function (superclass) {
    * @returns r,g,b,a array of values from 0 to 255 representing the color values for each channel
    */
   OccupancyGrid.prototype.getColor = function getColor (index, row, col, value) {
+    var scale;
+    if (value === 100) {
+      scale = 0;
+    } else if (value === 0) {
+      scale = 255;
+    } else {
+      scale = 127;
+    }
     return [
-      (value * this.color.r) / 255,
-      (value * this.color.g) / 255,
-      (value * this.color.b) / 255,
+      (scale * this.color.r) / 255,
+      (scale * this.color.g) / 255,
+      (scale * this.color.b) / 255,
       255
     ];
   };
@@ -57905,7 +57913,7 @@ Highlighter.prototype.renderHighlights = function renderHighlights (scene, rende
 
 /**
  * Traverses the given object and makes every object that's a Mesh,
- * Line or Sprite invisible. Also saves the previous visibility state
+ * Line, Sprite or points invisible. Also saves the previous visibility state
  * so we can restore it later.
  *
  * @param scene - the object to traverse
@@ -57913,7 +57921,7 @@ Highlighter.prototype.renderHighlights = function renderHighlights (scene, rende
 Highlighter.prototype.makeEverythingInvisible = function makeEverythingInvisible (scene) {
   scene.traverse(function(currentObject) {
     if ( currentObject instanceof THREE.Mesh || currentObject instanceof THREE.Line
-         || currentObject instanceof THREE.Sprite ) {
+         || currentObject instanceof THREE.Sprite || currentObject instanceof THREE.Points ) {
       currentObject.previousVisibility = currentObject.visible;
       currentObject.visible = false;
     }
@@ -57929,7 +57937,7 @@ Highlighter.prototype.makeEverythingInvisible = function makeEverythingInvisible
 Highlighter.prototype.makeHighlightedVisible = function makeHighlightedVisible (scene) {
   var makeVisible = function(currentObject) {
       if ( currentObject instanceof THREE.Mesh || currentObject instanceof THREE.Line
-           || currentObject instanceof THREE.Sprite ) {
+           || currentObject instanceof THREE.Sprite || currentObject instanceof THREE.Points ) {
         currentObject.visible = true;
       }
   };
