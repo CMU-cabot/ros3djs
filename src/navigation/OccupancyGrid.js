@@ -60,7 +60,6 @@ ROS3D.OccupancyGrid = function(options) {
   this.scale.x = info.resolution;
   this.scale.y = info.resolution;
 
-  var data = message.data;
   // update the texture (after the the super call and this are accessible)
   this.color = color;
   this.material = material;
@@ -73,16 +72,26 @@ ROS3D.OccupancyGrid = function(options) {
       var invRow = (height - row - 1);
       var mapI = col + (invRow * width);
       // determine the value
-      var val = this.getValue(mapI, invRow, col, data);
-
-      // determine the color
-      var color = this.getColor(mapI, invRow, col, val);
+      var data = message.data[mapI];
+      var val;
+      if (data === 100) {
+        val = 0;
+      } else if (data === 0) {
+        val = 255;
+      } else {
+        val = 127;
+      }
 
       // determine the index into the image data array
       var i = (col + (row * width)) * 4;
-
-      // copy the color
-      imageData.set(color, i);
+      // r
+      imageData[i] = val;
+      // g
+      imageData[++i] = val;
+      // b
+      imageData[++i] = val;
+      // a
+      imageData[++i] = 255;
     }
   }
 
