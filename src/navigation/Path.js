@@ -20,6 +20,7 @@ ROS3D.Path = function(options) {
   options = options || {};
   this.ros = options.ros;
   this.topicName = options.topic || '/path';
+  this.messageTypeName = options.messageType || 'nav_msgs/Path';
   this.tfClient = options.tfClient;
   this.color = options.color || 0xcc00ff;
   this.rootObject = options.rootObject || new THREE.Object3D();
@@ -31,7 +32,6 @@ ROS3D.Path = function(options) {
   this.subscribe();
 };
 ROS3D.Path.prototype.__proto__ = THREE.Object3D.prototype;
-
 
 ROS3D.Path.prototype.unsubscribe = function(){
   if(this.rosTopic){
@@ -47,7 +47,7 @@ ROS3D.Path.prototype.subscribe = function(){
       ros : this.ros,
       name : this.topicName,
       queue_length : 1,
-      messageType : 'nav_msgs/Path'
+      messageType : this.messageTypeName
   });
   this.rosTopic.subscribe(this.processMessage.bind(this));
 };

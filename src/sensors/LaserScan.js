@@ -23,6 +23,7 @@ ROS3D.LaserScan = function(options) {
   options = options || {};
   this.ros = options.ros;
   this.topicName = options.topic || '/scan';
+  this.messageTypeName = options.messageType || 'sensor_msgs/LaserScan';
   this.compression = options.compression || 'cbor';
   this.points = new ROS3D.Points(options);
   this.rosTopic = undefined;
@@ -47,7 +48,7 @@ ROS3D.LaserScan.prototype.subscribe = function(){
     name : this.topicName,
     compression : this.compression,
     queue_length : 1,
-    messageType : 'sensor_msgs/LaserScan'
+    messageType : this.messageTypeName
   });
   this.rosTopic.subscribe(this.processMessage.bind(this));
 };
