@@ -50,6 +50,7 @@ ROS3D.Viewer = function(options) {
   // create the canvas to render to
   this.renderer = new THREE.WebGLRenderer({
     antialias : antialias,
+    preserveDrawingBuffer: true,
     alpha: true
   });
   this.renderer.setClearColor(parseInt(background.replace('#', '0x'), 16), alpha);
